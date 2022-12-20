@@ -12,17 +12,27 @@ export const UseReducer = ( { name } ) => {
             setTimeout(() => {
                 // validar si el SECURITY_CODE1 es valido
                 if (state.value === SECURITY_CODE1 ) {
-                    dispatch({
-                        type: 'CONFIRM'
-                    })
+                    onConfirm();
                 } else {
-                    dispatch({
-                        type: 'ERROR'
-                    })
+                    onError();
                 }
             }, 2000);
         }        
     }, [state]);
+
+    //Action Creators
+    const onConfirm = () => dispatch({ type: actionTypes.confirm });
+    const handleClickComprobar = () => dispatch({ type: actionTypes.check });
+    const handleClickEliminar = () => dispatch({ type: actionTypes.delete });
+    const handleClickCancelar = () => dispatch({ type: actionTypes.cancel });
+    const handleClickRegresar = () => dispatch({ type: actionTypes.return });
+    const onError = () => dispatch({ type: actionTypes.error });
+    const handleChangeCodigoSeguridad = (e) => {
+        dispatch({
+            type: actionTypes.code,
+            payload: e.target.value
+        })
+    };
 
     // Validar el estado y dependiendo de cada caso se va renderizar la vista 
     if(!state.deleted && !state.confirmed){
@@ -45,22 +55,13 @@ export const UseReducer = ( { name } ) => {
                 }
     
                 <input 
-                    onChange={ (e) => {
-                        dispatch({
-                            type: 'CODIGO',
-                            payload: e.target.value
-                        })
-                    } }      
+                    onChange={ (e) => {handleChangeCodigoSeguridad(e)} }      
                     placeholder='Codigo de seguridad' 
                     value={state.value}
                 />
     
                 <button
-                    onClick={ () => {
-                        dispatch({
-                            type: 'COMPROBAR'
-                        })
-                    } }
+                    onClick={ handleClickComprobar }
                 >
                     Comprobar
                 </button>
@@ -71,20 +72,12 @@ export const UseReducer = ( { name } ) => {
             <Fragment>
                 <p>Estas seguro que deseas eliminar?</p>
                 <button
-                    onClick={ () => {
-                        dispatch({
-                            type: 'ELIMINAR'
-                        })
-                    } }
+                    onClick={ handleClickEliminar }
                 >
                     Si, eliminar
                 </button>
                 <button
-                    onClick={ () => {
-                        dispatch({
-                            type: 'CANCELAR'
-                        })
-                    } }
+                    onClick={ handleClickCancelar }
                 >
                     No, me arrepentí
                 </button>
@@ -95,11 +88,7 @@ export const UseReducer = ( { name } ) => {
             <Fragment>
                 <p>Eliminado con exito</p>
                 <button
-                    onClick={ () => {
-                        dispatch({
-                            type: 'REGRESAR'
-                        })
-                    } }
+                    onClick={ handleClickRegresar }
                 >
                     Regresar
                 </button>
@@ -112,44 +101,54 @@ export const UseReducer = ( { name } ) => {
 //Crear un objeto de estado inicial 
 const initialState = {
     value:'',
-        error:false,
-        loading:false,
-        deleted:false,
-        confirmed:false
+    error:false,
+    loading:false,
+    deleted:false,
+    confirmed:false
+}
+
+const actionTypes = {
+    confirm: 'CONFIRM',
+    error: 'ERROR',
+    check: 'COMPROBAR',
+    code: 'CODIGO',
+    delete: 'ELIMINAR',
+    cancel: 'CANCELAR',
+    return: 'REGRESAR'
 }
 
 //crear la  funcion reducerObject pero recibe solo el state y  retornamos implicitamente un objeto clave '' : {}
 const reducerObject = (state, payload) => ({
-    'CONFIRM' : {
+    [actionTypes.confirm] : {
         ...state,
         error:false,
         loading:false,
         confirmed:true,
     },
-    'ERROR': {
+    [actionTypes.error]: {
         ...state,
         error:true,
         loading:false,
     },
-    'COMPROBAR': {
+    [actionTypes.check]: {
         ...state,
         loading:true,
         error:false,
     },
-    'CODIGO': {
+    [actionTypes.code]: {
         ...state,
         value: payload
     },
-    'ELIMINAR': {
+    [actionTypes.delete]: {
         ...state,
         deleted:true,
     },
-    'CANCELAR': {
+    [actionTypes.cancel]: {
         ...state,
         confirmed:false,
         value:''
     },
-    'REGRESAR': {
+    [actionTypes.return]: {
         ...state,
         confirmed:false,
         deleted:false,
